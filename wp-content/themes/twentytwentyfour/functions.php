@@ -204,3 +204,63 @@ if ( ! function_exists( 'twentytwentyfour_pattern_categories' ) ) :
 endif;
 
 add_action( 'init', 'twentytwentyfour_pattern_categories' );
+
+// Registering custom post type Products
+
+function register_products_post_type() {
+    $args = array(
+        'labels' => array(
+            'name' => __('Products', 'textdomain'),
+            'singular_name' => __('Product', 'textdomain'),
+            'add_new' => __('Add New', 'textdomain'),
+            'add_new_item' => __('Add New Product', 'textdomain'),
+            'edit_item' => __('Edit Product', 'textdomain'),
+            'new_item' => __('New Product', 'textdomain'),
+            'view_item' => __('View Product', 'textdomain'),
+            'view_items' => __('View Products', 'textdomain'),
+            'search_items' => __('Search Products', 'textdomain'),
+            'not_found' => __('No products found', 'textdomain'),
+            'not_found_in_trash' => __('No products found in trash', 'textdomain'),
+            'all_items' => __('All Products', 'textdomain'),
+            'archives' => __('Product Archives', 'textdomain'),
+            'attributes' => __('Product Attributes', 'textdomain'),
+            'insert_into_item' => __('Insert into product', 'textdomain'),
+            'uploaded_to_this_item' => __('Uploaded to this product', 'textdomain'),
+            'featured_image' => __('Featured Image', 'textdomain'),
+            'set_featured_image' => __('Set featured image', 'textdomain'),
+            'remove_featured_image' => __('Remove featured image', 'textdomain'),
+            'use_featured_image' => __('Use as featured image', 'textdomain'),
+            'menu_name' => __('Products', 'textdomain'),
+            'filter_items_list' => __('Filter products list', 'textdomain'),
+            'items_list_navigation' => __('Products list navigation', 'textdomain'),
+            'items_list' => __('Products list', 'textdomain'),
+        ),
+        'public' => true,
+        'has_archive' => true,
+        'rewrite' => array('slug' => 'products'),
+        'supports' => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments'),
+        'show_in_rest' => true  // Enables Gutenberg editor support
+    );
+
+    register_post_type('product', $args);
+}
+
+add_action('init', 'register_products_post_type');
+
+
+function register_acf_to_rest_api() {
+    register_rest_field('product', 'acf_fields', array(
+        'get_callback'    => 'expose_acf_fields',
+        'schema'          => null,
+    ));
+}
+
+add_action('rest_api_init', 'register_acf_to_rest_api');
+
+function expose_acf_fields($object) {
+    // Check if the object has an ID and if ACF is active
+    if (isset($object['id']) && function_exists('get_fields')) {
+        return get_fields($object['id']);
+    }
+    return null;
+}
